@@ -23,8 +23,6 @@ class Main(QtWidgets.QMainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         global ui
-        # global custom_edit
-
         ui = Ui_MainWindow()
         ui.setupUi(self)
 
