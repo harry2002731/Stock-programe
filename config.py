@@ -8383,5 +8383,5 @@ interestingStockList={
     '亿纬锂能': '300014.SZ'
     }
 
-dbPath = r'C:\Users\Harry2002\Desktop\数据库文件\database.db'
+dbPath = r'C:\数据库文件\database.db'
 # print(tushare.keys())
