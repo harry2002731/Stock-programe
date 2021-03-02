@@ -23,6 +23,8 @@ class Main(QtWidgets.QMainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         global ui
+        # global custom_edit
+
         ui = Ui_MainWindow()
         ui.setupUi(self)
 
@@ -31,26 +33,28 @@ class Main(QtWidgets.QMainWindow):
         ui.listWidget.itemClicked.connect(self.listWidget_selectionChange)
         ui.listWidget.itemSelectionChanged.connect(self.listWidget_selectionChange)
         ui.listWidget_2.itemClicked.connect(self.listWidget2_selectionChange)
-        ui.listWidget_2.itemSelectionChanged.connect(self.listWidget_selectionChange)
+        ui.listWidget_2.itemSelectionChanged.connect(self.listWidget2_selectionChange)
 
-        ui.pushButton.clicked.connect(self.appendToInteringStockList)  #添加到自选股
-        ui.pushButton_2.clicked.connect(self.moveFromInteringStockList)  #移除自选股
+        ui.pushButton.clicked.connect(self.appendToInteringStockList)  # 添加到自选股
+        ui.pushButton_2.clicked.connect(self.moveFromInteringStockList)  # 移除自选股
 
-        ui.pushButton_3.clicked.connect(self.recommendStockCal)  #荐股计算
+        ui.pushButton_3.clicked.connect(self.recommendStockCal)  # 荐股计算
+
+        ui.pushButton_4.clicked.connect(self.pushButton_4_gainloseCal)  # 自选股收益计算
 
         # self.region = pg.LinearRegionItem()
         # self.region.setZValue(10)
         # self.region.sigRegionChanged.connect(self.update)
-        
-        #添加自选股    
+
+        # 添加自选股
         ui.listWidget_2.clear()
-        rec=config.interestingStockList
+        rec = config.interestingStockList
         if rec:
             for i in range(len(rec)):
                 ui.listWidget_2.addItem(list(rec.keys())[i])
 
-        #添加股票代码
-        rec=config.Stock_list
+        # 添加股票代码
+        rec = config.Stock_list
         if rec:
             for i in range(len(rec)):
                 ui.listWidget.addItem(list(rec.keys())[i])
@@ -60,30 +64,84 @@ class Main(QtWidgets.QMainWindow):
 
         """header 表头  stock_data 数据类型 int(t), str(trade_date), float(open), float(close), float(low),
         float(high), float(vol), float(change), float(pct_chg)) """
+
+    def pushButton_4_gainloseCal(self):
+        # 自选股收益计算
+        ec = Earning_compare()
+        key, value = [], []
+        for i in range(ui.listWidget_2.count()):
+            item = ui.listWidget_2.item(i).text()
+            key.append(item)
+            value.append(config.Stock_list[item])
+        list = dict(zip(key, value))
+
+        # list = {'宏大爆破': '002683.SZ',
+        #         '晶方科技': '603005.SH',
+        #         '双塔食品': '002481.SZ',
+        #         '亿纬锂能': '300014.SZ'}
+
+        db = ec.CalculateForspecStock(list)
+        wg = ui.listWidget_5
+        wg.clear()
+        for i in range(len(db)):
+            sumlist = db[i][0]
+            detail = db[i][1]
+            wg.addItem(f"-----------------------------------")
+            wg.addItem(f"{detail[1][1]} {detail[1][1]}")
+            wg.addItem(f"-----------------------------------")
+            wg.addItem(f"总收益:{db[i][0] - 100000}  {(int(db[i][0] - 100000) / 100000) * 100}%")
+            wg.addItem(f"-----------------------------------")
+            wg.addItem(f"--{detail[0][3:6]}")
+            wg.addItem(f"--{detail[len(detail) - 1][7:10]}")
+            wg.addItem(f"-----------------------------------")
+            amount = 0
+            for c in range(len(detail)):
+                amount = amount + detail[c][11]
+                wg.addItem(f"{detail[c][0] - 1}： 累计收益:{amount} : {detail[c][3:]}")
+
     def recommendStockCal(self):
         ec = Earning_compare()
-        # ec = Earning_compare.
-
-
+        # list = {'宏大爆破': '002683.SZ',
+        #         '晶方科技': '603005.SH',
+        #         '双塔食品': '002481.SZ',
+        #         '亿纬锂能': '300014.SZ'}
+        db = ec.CalculateForspecStock(config.recommendStock)
+        ui.listWidget_3.clear()
+        for i in range(len(db)):
+            sumlist = db[i][0]
+            detail = db[i][1]
+            ui.listWidget_3.addItem(f"-----------------------------------")
+            ui.listWidget_3.addItem(f"{detail[1][1]} {detail[1][1]}")
+            ui.listWidget_3.addItem(f"-----------------------------------")
+            ui.listWidget_3.addItem(f"总收益:{db[i][0] - 100000}  {(int(db[i][0] - 100000) / 100000) * 100}%")
+            ui.listWidget_3.addItem(f"-----------------------------------")
+            ui.listWidget_3.addItem(f"--{detail[0][3:6]}")
+            ui.listWidget_3.addItem(f"--{detail[len(detail) - 1][7:10]}")
+            ui.listWidget_3.addItem(f"-----------------------------------")
+            amount = 0
+            for c in range(len(detail)):
+                amount = amount + detail[c][11]
+                ui.listWidget_3.addItem(f"{detail[c][0] - 1}： 累计收益:{amount} : {detail[c][3:]}")
 
     def appendToInteringStockList(self):
         text = ui.listWidget.currentItem().text()
         ui.listWidget_2.addItem(text)
-        #保存自选股名单
+
+        # 保存自选股名单
 
     def moveFromInteringStockList(self):
         text = ui.listWidget_2.currentItem().text()
-      
-        for i in range(ui.listWidget_2.count()):            
+
+        for i in range(ui.listWidget_2.count()):
             item = ui.listWidget_2.item(i).text()
-            if text==item:
+            if text == item:
                 ui.listWidget_2.takeItem(i)
 
-    def custom_edit_textChanged(self,event):
+    def custom_edit_textChanged(self, event):
         # if event != '':
         try:
 
-            rec=fuzzyfinder.fuzzyfinder(event, config.Stock_list.keys())
+            rec = fuzzyfinder.fuzzyfinder(event, config.Stock_list.keys())
             ui.listWidget.clear()
             if rec:
                 for i in range(len(rec)):
@@ -97,11 +155,11 @@ class Main(QtWidgets.QMainWindow):
         text = ui.listWidget_2.currentItem().text()
         self.stockclick(text)
 
-    def stockclick(self,text):
+    def stockclick(self, text):
         Datalist = Fetch_stock_data()
         Datalist.ini(config.Stock_list[text])
 
-        if ui.verticalLayout.count()==0:
+        if ui.verticalLayout.count() == 0:
 
             Moving_data = Datalist.Data_form_list.Moving_datum
             cdst = CandlestickItem(Datalist.Data_form_list.Candle_datum, Moving_data, 400)
@@ -110,10 +168,9 @@ class Main(QtWidgets.QMainWindow):
             ui.verticalLayout.addWidget(cdst1.plt)
             list = Calculation(Moving_data)
 
-
-            d=Mat_picture(list.earning_x, list.earning_y)
+            d = Mat_picture(list.earning_x, list.earning_y, Datalist.Data_form_list.Candle_datum)
             ui.verticalLayout_2.addWidget(cdst.plt)
-            ui.verticalLayout_2.addWidget(d.win)
+            ui.verticalLayout_2.addWidget(d.plt)
         else:
             for i in range(ui.verticalLayout.count()):
                 ui.verticalLayout.itemAt(i).widget().deleteLater()
@@ -125,17 +182,46 @@ class Main(QtWidgets.QMainWindow):
             ui.verticalLayout.addWidget(cdst.plt)
             ui.verticalLayout.addWidget(cdst1.plt)
             list = Calculation(Moving_data)
-            d = Mat_picture(list.earning_x, list.earning_y)
+            d = Mat_picture(list.earning_x, list.earning_y, Datalist.Data_form_list.Candle_datum)
             ui.verticalLayout_2.addWidget(cdst.plt)
-            ui.verticalLayout_2.addWidget(d.win)
+            ui.verticalLayout_2.addWidget(d.plt)
 
+        self.singleStockGainLoseCal(text)
+
+    def singleStockGainLoseCal(self, stockcode):
+        ec = Earning_compare()
+        key, value = [], []
+        key.append(stockcode)
+        value.append(config.Stock_list[stockcode])
+        list = dict(zip(key, value))
+
+        # list = {'宏大爆破': '002683.SZ',
+        #         '晶方科技': '603005.SH',
+        #         '双塔食品': '002481.SZ',
+        #         '亿纬锂能': '300014.SZ'}
+
+        db = ec.CalculateForspecStock(list)
+        wg = ui.listWidget_5
+        wg.clear()
+        for i in range(len(db)):
+            sumlist = db[i][0]
+            detail = db[i][1]
+            wg.addItem(f"-----------------------------------")
+            wg.addItem(f"{detail[1][1]} {detail[1][1]}")
+            wg.addItem(f"-----------------------------------")
+            wg.addItem(f"总收益:{db[i][0] - 100000}  {(int(db[i][0] - 100000) / 100000) * 100}%")
+            wg.addItem(f"-----------------------------------")
+            wg.addItem(f"--{detail[0][3:6]}")
+            wg.addItem(f"--{detail[len(detail) - 1][7:10]}")
+            wg.addItem(f"-----------------------------------")
+            amount = 0
+            for c in range(len(detail)):
+                amount = amount + detail[c][11]
+                wg.addItem(f"{detail[c][0] - 1}： 累计收益:{amount} : {detail[c][3:]}")
 
     def listWidget_selectionChange(self):
         text = ui.listWidget.currentItem().text()
         self.stockclick(text)
-        
-
-
 
 
 if __name__ == '__main__':
