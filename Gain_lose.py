@@ -1,8 +1,14 @@
+import datetime
+
+import pandas as pd
+
 from utility import *
 import matplotlib.pyplot as plt
-from PyQt5 import QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 import numpy as np
 import pyqtgraph as pg
+import config
+from SQLserver import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 Interchange_fees = 0.003
@@ -24,6 +30,7 @@ datum = Data.Moving_datum
 class Calculation():
     def __init__(self, datum):
         # self.amount
+        self.datum=datum
         self.hold_vol = 0
         self.final_amount = 0
         self.hold_amount = 100000
@@ -48,8 +55,8 @@ class Calculation():
         while selectIndex < len(self.stocklist):
             self.Stocklist = self.stocklist[selectIndex]
             self.Decision()
-            # if selectIndex == len(self.stocklist) - 1:
-            #     print(int(self.Final_amount())) # 打印最终总收益  类型--int
+            if selectIndex == len(self.stocklist) - 1:
+                print(int(self.Final_amount())) # 打印最终总收益  类型--int
             selectIndex += 1
 
     def Decision(self):
@@ -122,20 +129,20 @@ class Calculation():
 
 
 class Mat_picture(pg.GraphicsObject):
-    def __init__(self, x, y, data):
+    def __init__(self, x, y,data):
         pg.GraphicsObject.__init__(self)
         self.picture = QtGui.QPicture()
-        self.data = data
+        self.data=data
         # self.days=config.StockDataDays
         # if len(self.data)>self.days:
-        self.days = len(self.data)
+        self.days=len(self.data)
 
-        self.y = np.array(y)
-        self.plt = pg.PlotWidget()
+        self.y = np.array(y)        
+        self.plt = pg.PlotWidget()        
         self.vLine = pg.InfiniteLine(angle=90, movable=False)
         self.hLine = pg.InfiniteLine(angle=0, movable=False)
-
-        self.x = x
+        
+        self.x = x      
         self.generate_picture()
 
         xdict = []
@@ -149,54 +156,52 @@ class Mat_picture(pg.GraphicsObject):
         self.plt = pg.PlotWidget(axisItems={'bottom': stringaxis}, enableMenu=True)
 
         item = self
-        self.plt.addItem(item)
+        self.plt.addItem(item)  
 
         self.plt.addItem(self.vLine, ignoreBounds=True)
-        self.plt.addItem(self.hLine, ignoreBounds=True)
-
+        self.plt.addItem(self.hLine, ignoreBounds=True)  
+           
         self.plt.setLabel('left', '收益(万)')
         self.plt.setLabel('bottom', '日 期')
         self.setFlag(self.ItemUsesExtendedStyleOption)
         self.label = pg.TextItem(text='', color=(255, 255, 255))
         self.plt.addItem(self.label)
 
-    def generate_picture(self):
+
+    def generate_picture(self):        
         p = QtGui.QPainter(self.picture)
-        p.setPen(pg.mkPen('g'))
+        p.setPen(pg.mkPen('g'))        
         prePoint = 0
         selectIndex = 0
-
-        t = [i[0] for i in self.data]
-        trade_date = [i[1] for i in self.data]
+        
+        t = [i[0] for i in self.data] 
+        trade_date=[i[1] for i in self.data] 
         list = dict(zip(trade_date, t))
 
         for i in range(len(self.x)):
-            t = list[self.x[i]]
-
+            t=list[self.x[i]]
+            
             if t == config.StockDataDays:
-                break
+                break            
             if prePoint != 0:
                 p.setPen(pg.mkPen('w'))
                 p.setBrush(pg.mkBrush('w'))
-                p.drawLine(QtCore.QPointF(pre_t, prePoint), QtCore.QPointF(t, self.y[selectIndex] / 10000))
-            pre_t = t
-            prePoint = self.y[selectIndex] / 10000
-            selectIndex = selectIndex + 1
+                p.drawLine(QtCore.QPointF(pre_t, prePoint), QtCore.QPointF(t, self.y[selectIndex]/10000))
+            pre_t=t
+            prePoint = self.y[selectIndex]/10000
+            selectIndex =selectIndex+1
         p.end()
 
     def paint(self, p, *args):
         p.drawPicture(0, 0, self.picture)
-
     def boundingRect(self):
         return QtCore.QRectF(self.picture.boundingRect())
-
     def onLClick(self, pos):
         x = pos.x()
         y = pos.y()
         self.vLine.setPos(pos.x())
         self.hLine.setPos(pos.y())
-
-    # 手动重画
+# 手动重画
     # ----------------------------------------------------------------------
     def update(self):
         if not self.scene() is None:
@@ -214,8 +219,9 @@ class Mat_picture(pg.GraphicsObject):
         index = int(pos.x())
         xdate = self.data[index][1]
         # print(xdate)
-
+        
         if index > 0 and index < self.days:
+            
             # dt = f"{dt[0:4]}-{dt[4:6]}-{dt[6:]}"
             # ui.label.setText(f"日期={self.data[index][1]}  开盘={self.data[index][2]}  收盘={self.data[index][3]}")
             # a = f"日期={self.data[index][1]}  开盘={self.data[index][2]}  收盘={self.data[index][3]}"
@@ -225,11 +231,13 @@ class Mat_picture(pg.GraphicsObject):
         self.vLine.setPos(pos.x())
         self.hLine.setPos(pos.y())
 
+
         # self.p1.plot(range(len(self.y)), self.y)
 
+      
         # self.p1.show()
 
 
-if __name__ == '__main__':
-    list = Calculation(datum)
-    Mat_picture(list.earning_x, list.earning_y)
+# if __name__ == '__main__':
+#     list = Calculation(datum)
+#     Mat_picture(list.earning_x, list.earning_y)

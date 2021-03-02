@@ -46,7 +46,7 @@ class Earning_compare(Fetch_stock_data):
             i += 1
             # print(self.Top_List)
             print(f"还剩{self.length - i}")
-        self.Write_to_txt()
+        # self.Write_to_txt()
         return self.Top_List
 
     def bubble_sort(self):

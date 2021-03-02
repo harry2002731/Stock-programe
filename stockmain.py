@@ -159,16 +159,15 @@ class Main(QtWidgets.QMainWindow):
         Datalist = Fetch_stock_data()
         Datalist.ini(config.Stock_list[text])
 
-        if ui.verticalLayout.count() == 0:
-
-            Moving_data = Datalist.Data_form_list.Moving_datum
-            cdst = CandlestickItem(Datalist.Data_form_list.Candle_datum, Moving_data, 400)
-            cdst1 = AmountstickItem(Datalist.Data_form_list.Amount_datum, 400)
+        Moving_data = Datalist.Data_form_list.Moving_datum
+        cdst = CandlestickItem(Datalist.Data_form_list.Candle_datum, Moving_data, 400)
+        cdst1 = AmountstickItem(Datalist.Data_form_list.Amount_datum, 400)
+        list = Calculation(Moving_data)
+        d = Mat_picture(list.earning_x, list.earning_y,Datalist.Data_form_list.Candle_datum)
+        
+        if ui.verticalLayout.count() == 0:            
             ui.verticalLayout.addWidget(cdst.plt)
-            ui.verticalLayout.addWidget(cdst1.plt)
-            list = Calculation(Moving_data)
-
-            d = Mat_picture(list.earning_x, list.earning_y, Datalist.Data_form_list.Candle_datum)
+            ui.verticalLayout.addWidget(cdst1.plt)            
             ui.verticalLayout_2.addWidget(cdst.plt)
             ui.verticalLayout_2.addWidget(d.plt)
         else:
@@ -177,18 +176,19 @@ class Main(QtWidgets.QMainWindow):
             for i in range(ui.verticalLayout_2.count()):
                 ui.verticalLayout_2.itemAt(i).widget().deleteLater()
             Moving_data = Datalist.Data_form_list.Moving_datum
-            cdst = CandlestickItem(Datalist.Data_form_list.Candle_datum, Moving_data, 400)
-            cdst1 = AmountstickItem(Datalist.Data_form_list.Amount_datum, 400)
+            # cdst = CandlestickItem(Datalist.Data_form_list.Candle_datum, Moving_data, 400)
+            # cdst1 = AmountstickItem(Datalist.Data_form_list.Amount_datum, 400)
             ui.verticalLayout.addWidget(cdst.plt)
             ui.verticalLayout.addWidget(cdst1.plt)
-            list = Calculation(Moving_data)
-            d = Mat_picture(list.earning_x, list.earning_y, Datalist.Data_form_list.Candle_datum)
+            # list = Calculation(Moving_data)
+            # d = Mat_picture(list.earning_x, list.earning_y,Datalist.Data_form_list.Candle_datum)
             ui.verticalLayout_2.addWidget(cdst.plt)
             ui.verticalLayout_2.addWidget(d.plt)
-
+        
         self.singleStockGainLoseCal(text)
+        
 
-    def singleStockGainLoseCal(self, stockcode):
+    def singleStockGainLoseCal(self,stockcode):
         ec = Earning_compare()
         key, value = [], []
         key.append(stockcode)
@@ -218,7 +218,7 @@ class Main(QtWidgets.QMainWindow):
             for c in range(len(detail)):
                 amount = amount + detail[c][11]
                 wg.addItem(f"{detail[c][0] - 1}： 累计收益:{amount} : {detail[c][3:]}")
-
+    
     def listWidget_selectionChange(self):
         text = ui.listWidget.currentItem().text()
         self.stockclick(text)

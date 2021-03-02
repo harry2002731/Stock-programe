@@ -1,6 +1,7 @@
 import pyqtgraph as pg
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
+import config
 
 from utility import Descison, selectedStock
 
@@ -10,7 +11,10 @@ class CandlestickItem(pg.GraphicsObject):
         pg.GraphicsObject.__init__(self)
         self.picture = QtGui.QPicture()
         self.data = data
-        self.days = days
+        self.days=config.StockDataDays
+        if len(self.data)>self.days:
+            self.days=len(self.data)
+        # self.days = days
         self.plt = pg.PlotWidget()
         self.vLine = pg.InfiniteLine(angle=90, movable=False)
         self.hLine = pg.InfiniteLine(angle=0, movable=False)
@@ -28,17 +32,17 @@ class CandlestickItem(pg.GraphicsObject):
         # 只重画部分图形，大大提高界面更新速度
         self.setFlag(self.ItemUsesExtendedStyleOption)
         self.label = pg.TextItem(text='', color=(255, 255, 255))
-
-        # self.label= pg.LabelItem(text='ADa',justify='left')
         self.plt.addItem(self.label)
 
     def X_axis(self):
         xdict = []
-
+        # self.days=config.StockDataDays
+        # if len(self.data)>self.days:
+        self.days=len(self.data)
         for i in range(self.days):
             dt = self.data[i][1]
             dt = f"{dt[0:4]}-{dt[4:6]}-{dt[6:]}"
-            if i % (int(self.days / 10)) == 0 or i == range(self.days):
+            if i % (int(self.days / 20)) == 0 or i == range(self.days):
                 xdict.append((self.data[i][0], dt))
         stringaxis = pg.AxisItem(orientation='bottom')
         stringaxis.setTicks([xdict])
