@@ -11,7 +11,7 @@ import config
 import fuzzyfinder
 from utility import *
 from Gain_lose import *
-from earning_Compare import earning_Compare
+from Earning_compare import Earning_compare
 from Fetch_stock_data import Fetch_stock_data
 from CandlestickItem import CandlestickItem
 from AmountstickItem import AmountstickItem
@@ -23,40 +23,38 @@ class Main(QtWidgets.QMainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         global ui
-        # global custom_edit
-
         ui = Ui_MainWindow()
         ui.setupUi(self)
 
-        self.setMouseTracking(True)
-        ui.custom_edit.textChanged.connect(self.custom_edit_textChanged)
-        ui.listWidget.itemClicked.connect(self.listWidget_selectionChange)
-        ui.listWidget.itemSelectionChanged.connect(self.listWidget_selectionChange)
-        ui.listWidget_2.itemClicked.connect(self.listWidget2_selectionChange)
+        self.setMouseTracking(True) # 设定鼠标坐标可追踪
+        ui.custom_edit.textChanged.connect(self.custom_edit_textChanged) # 监测文本框内文字是否变化
+        ui.listWidget.itemClicked.connect(self.listWidget_selectionChange) # 监测列表是否被点击
+        ui.listWidget.itemSelectionChanged.connect(self.listWidget_selectionChange) #
+        ui.listWidget_2.itemClicked.connect(self.listWidget2_selectionChange) #
         ui.listWidget_2.itemSelectionChanged.connect(self.listWidget2_selectionChange)
 
         ui.pushButton.clicked.connect(self.appendToInteringStockList)  # 添加到自选股
         ui.pushButton_2.clicked.connect(self.moveFromInteringStockList)  # 移除自选股
-        ui.pushButton_3.clicked.connect(self.recommendStockCal)  # 荐股计算
-        ui.pushButton_4.clicked.connect(self.pushButton_4_gainloseCal)  # 自选股收益计算
 
+        ui.pushButton_3.clicked.connect(self.recommendStockCal)  # 荐股计算
+
+        ui.pushButton_4.clicked.connect(self.pushButton_4_gainloseCal)  # 自选股收益计算
 
         # self.region = pg.LinearRegionItem()
         # self.region.setZValue(10)
         # self.region.sigRegionChanged.connect(self.update)
 
         # 添加自选股
-        ui.listWidget_2.clear()
-        rec = config.interestingStockList
+        ui.listWidget_2.clear()  # 清除列表内的内容
+        rec = config.interestingStockList  # 获取自选股字典
         if rec:
             for i in range(len(rec)):
-                ui.listWidget_2.addItem(list(rec.keys())[i])
+                ui.listWidget_2.addItem(list(rec.keys())[i]) # 遍历rec的key值（自选股股票名称）并添加到列表框内
 
-        # 添加股票代码
         rec = config.Stock_list
         if rec:
             for i in range(len(rec)):
-                ui.listWidget.addItem(list(rec.keys())[i])
+                ui.listWidget.addItem(list(rec.keys())[i])  # 遍历rec的key值（股票名称）并添加到股票列表框内
 
         root = tkinter.Tk()  # 创建一个Tkinter.Tk()实例
         root.withdraw()  # 将Tkinter.Tk()实例隐藏
@@ -64,17 +62,9 @@ class Main(QtWidgets.QMainWindow):
         """header 表头  stock_data 数据类型 int(t), str(trade_date), float(open), float(close), float(low),
         float(high), float(vol), float(change), float(pct_chg)) """
 
-    def MymouseEvent(self, event):
-        pos=event.pos()
-        self.d.vLine.setPos(int(pos.x()))
-        self.cdst.vLine.setPos(int(pos.x()))
-
-
-
-
     def pushButton_4_gainloseCal(self):
         # 自选股收益计算
-        ec = earning_Compare()
+        ec = Earning_compare()
         key, value = [], []
         for i in range(ui.listWidget_2.count()):
             item = ui.listWidget_2.item(i).text()
@@ -105,12 +95,9 @@ class Main(QtWidgets.QMainWindow):
             for c in range(len(detail)):
                 amount = amount + detail[c][11]
                 wg.addItem(f"{detail[c][0] - 1}： 累计收益:{amount} : {detail[c][3:]}")
+
     def recommendStockCal(self):
-        ec = earning_Compare()
-        # list = {'宏大爆破': '002683.SZ',
-        #         '晶方科技': '603005.SH',
-        #         '双塔食品': '002481.SZ',
-        #         '亿纬锂能': '300014.SZ'}
+        ec = Earning_compare()
         db = ec.CalculateForspecStock(config.recommendStock)
         ui.listWidget_3.clear()
         for i in range(len(db)):
@@ -161,11 +148,11 @@ class Main(QtWidgets.QMainWindow):
         Datalist.ini(config.Stock_list[text])
 
         Moving_data = Datalist.Data_form_list.Moving_datum
-        
+
         self.cdst = CandlestickItem(Datalist.Data_form_list.Candle_datum, Moving_data, 400)
-    
+
         self.cdst1 = AmountstickItem(Datalist.Data_form_list.Amount_datum, 400)
-        
+
         list = Calculation(Moving_data)
 
         self.d = Mat_picture(list.earning_x, list.earning_y, Datalist.Data_form_list.Candle_datum)
@@ -195,7 +182,7 @@ class Main(QtWidgets.QMainWindow):
         self.singleStockGainLoseCal(text)
 
     def singleStockGainLoseCal(self: 'spam', stockcode: str):
-        ec = earning_Compare()
+        ec = Earning_compare()
         key, value = [], []
         key.append(stockcode)
         value.append(config.Stock_list[stockcode])
@@ -224,6 +211,7 @@ class Main(QtWidgets.QMainWindow):
             for c in range(len(detail)):
                 amount = amount + detail[c][11]
                 wg.addItem(f"{detail[c][0] - 1}： 累计收益:{amount} : {detail[c][3:]}")
+    
     def listWidget_selectionChange(self):
         text = ui.listWidget.currentItem().text()
         self.stockclick(text)
