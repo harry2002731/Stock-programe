@@ -187,6 +187,11 @@ class Mat_picture(pg.GraphicsObject):
                 p.setPen(pg.mkPen('w'))
                 p.setBrush(pg.mkBrush('w'))
                 p.drawLine(QtCore.QPointF(pre_t, prePoint), QtCore.QPointF(t, self.y[selectIndex]/10000))
+
+                p.setPen(pg.mkPen('r'))
+                p.setBrush(pg.mkBrush('r'))
+                p.drawEllipse(pre_t-1, prePoint-1, 1 * 2, 1 * 2)
+
             pre_t=t
             prePoint = self.y[selectIndex]/10000
             selectIndex =selectIndex+1
@@ -218,24 +223,21 @@ class Mat_picture(pg.GraphicsObject):
         pos = event.pos()
         index = int(pos.x())
         xdate = self.data[index][1]
-        # print(xdate)
-        
-        if index > 0 and index < self.days:
-            
-            # dt = f"{dt[0:4]}-{dt[4:6]}-{dt[6:]}"
-            # ui.label.setText(f"日期={self.data[index][1]}  开盘={self.data[index][2]}  收盘={self.data[index][3]}")
-            # a = f"日期={self.data[index][1]}  开盘={self.data[index][2]}  收盘={self.data[index][3]}"
-            # self.label.setText(a)
-            pass
+        y= 0
+        if xdate in self.x and 0 < index < self.days:
+            list = dict(zip(self.x, self.y))
+            y = list[xdate]/10000
+            self.vLine.setPos(pos.x())
+            self.hLine.setPos(y)
 
-        self.vLine.setPos(pos.x())
-        self.hLine.setPos(pos.y())
+            a = f"日期: {xdate} \r\n  累计盈利: {int(y)} 万元  "
+            self.label.setText(a)
+            self.label.setPos(pos.x(), pos.y())
 
+        else:
+            self.vLine.setPos(pos.x())
+            # self.hLine.setPos(pos.y())
 
-        # self.p1.plot(range(len(self.y)), self.y)
-
-      
-        # self.p1.show()
 
 
 # if __name__ == '__main__':

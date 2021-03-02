@@ -4218,6 +4218,6 @@ recommendStock = {
     '晶方科技': '603005.SH',
     '双塔食品': '002481.SZ',
     '亿纬锂能': '300014.SZ'}
-dbPath = r'c:\大数据股票\database.db'
+dbPath = r'C:\数据库文件\database.db'
 StockDataDays=400
 # print(tushare.keys())

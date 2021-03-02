@@ -144,5 +144,6 @@ class CandlestickItem(pg.GraphicsObject):
             a = f"日期={self.data[index][1]}  开盘={self.data[index][2]}  收盘={self.data[index][3]}"
             self.label.setText(a)
 
+        self.label.setPos(pos.x(), pos.y())
         self.vLine.setPos(pos.x())
         self.hLine.setPos(y)
