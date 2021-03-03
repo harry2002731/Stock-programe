@@ -11,9 +11,9 @@ from Fetch_stock_data import Fetch_stock_data
  """
 
 
-class Earning_compare(Fetch_stock_data):
+class earning_Compare(Fetch_stock_data):
     def __init__(self):
-        super(Earning_compare, self).__init__()
+        super(earning_Compare, self).__init__()
         self.length = 0
         self.Top_List, self.detal_list, self.summary_list = [], [], []
 
@@ -95,4 +95,4 @@ class Earning_compare(Fetch_stock_data):
 
 
 if __name__ == '__main__':
-    Earning_compare()
+    earning_Compare()

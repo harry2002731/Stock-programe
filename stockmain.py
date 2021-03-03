@@ -11,7 +11,7 @@ import config
 import fuzzyfinder
 from utility import *
 from Gain_lose import *
-from Earning_compare import Earning_compare
+from earning_Compare import earning_Compare
 from Fetch_stock_data import Fetch_stock_data
 from CandlestickItem import CandlestickItem
 from AmountstickItem import AmountstickItem
@@ -42,6 +42,7 @@ class Main(QtWidgets.QMainWindow):
 
         ui.pushButton_4.clicked.connect(self.pushButton_4_gainloseCal)  # 自选股收益计算
 
+
         # self.region = pg.LinearRegionItem()
         # self.region.setZValue(10)
         # self.region.sigRegionChanged.connect(self.update)
@@ -65,9 +66,12 @@ class Main(QtWidgets.QMainWindow):
         """header 表头  stock_data 数据类型 int(t), str(trade_date), float(open), float(close), float(low),
         float(high), float(vol), float(change), float(pct_chg)) """
 
+    def MymouseEvent(self, event):
+        self.cdst1.vLine.setPos(event.x)
+
     def pushButton_4_gainloseCal(self):
         # 自选股收益计算
-        ec = Earning_compare()
+        ec = earning_Compare()
         key, value = [], []
         for i in range(ui.listWidget_2.count()):
             item = ui.listWidget_2.item(i).text()
@@ -100,7 +104,7 @@ class Main(QtWidgets.QMainWindow):
                 wg.addItem(f"{detail[c][0] - 1}： 累计收益:{amount} : {detail[c][3:]}")
 
     def recommendStockCal(self):
-        ec = Earning_compare()
+        ec = earning_Compare()
         # list = {'宏大爆破': '002683.SZ',
         #         '晶方科技': '603005.SH',
         #         '双塔食品': '002481.SZ',
@@ -163,11 +167,15 @@ class Main(QtWidgets.QMainWindow):
         cdst = CandlestickItem(Datalist.Data_form_list.Candle_datum, Moving_data, 400)
         cdst1 = AmountstickItem(Datalist.Data_form_list.Amount_datum, 400)
         list = Calculation(Moving_data)
-        d = Mat_picture(list.earning_x, list.earning_y,Datalist.Data_form_list.Candle_datum)
-        
-        if ui.verticalLayout.count() == 0:            
+
+        d = Mat_picture(list.earning_x, list.earning_y, Datalist.Data_form_list.Candle_datum)
+        # cdst1.appendDataToPicture(text)
+
+        cdst.sigMouseMoveChanged.connect(self.MymouseEvent)  # K线图鼠标同步事件
+
+        if ui.verticalLayout.count() == 0:
             ui.verticalLayout.addWidget(cdst.plt)
-            ui.verticalLayout.addWidget(cdst1.plt)            
+            ui.verticalLayout.addWidget(cdst1.plt)
             ui.verticalLayout_2.addWidget(cdst.plt)
             ui.verticalLayout_2.addWidget(d.plt)
         else:
@@ -184,12 +192,11 @@ class Main(QtWidgets.QMainWindow):
             # d = Mat_picture(list.earning_x, list.earning_y,Datalist.Data_form_list.Candle_datum)
             ui.verticalLayout_2.addWidget(cdst.plt)
             ui.verticalLayout_2.addWidget(d.plt)
-        
-        self.singleStockGainLoseCal(text)
-        
 
-    def singleStockGainLoseCal(self,stockcode):
-        ec = Earning_compare()
+        self.singleStockGainLoseCal(text)
+
+    def singleStockGainLoseCal(self: 'spam', stockcode: str):
+        ec = earning_Compare()
         key, value = [], []
         key.append(stockcode)
         value.append(config.Stock_list[stockcode])
@@ -218,7 +225,7 @@ class Main(QtWidgets.QMainWindow):
             for c in range(len(detail)):
                 amount = amount + detail[c][11]
                 wg.addItem(f"{detail[c][0] - 1}： 累计收益:{amount} : {detail[c][3:]}")
-    
+
     def listWidget_selectionChange(self):
         text = ui.listWidget.currentItem().text()
         self.stockclick(text)

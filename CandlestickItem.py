@@ -2,11 +2,15 @@ import pyqtgraph as pg
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 import config
+from PyQt5.QtCore import pyqtSignal, QObject
 
 from utility import Descison, selectedStock
 
+sigMouseMoveChanged = pyqtSignal(QObject)
 
 class CandlestickItem(pg.GraphicsObject):
+    sigMouseMoveChanged = pyqtSignal()  # 鼠标移动事件
+
     def __init__(self, data, datum, days):
         pg.GraphicsObject.__init__(self)
         self.picture = QtGui.QPicture()
@@ -95,9 +99,24 @@ class CandlestickItem(pg.GraphicsObject):
                 p.setBrush(pg.mkBrush('b'))
                 p.drawLine(QtCore.QPointF(t - 1, prema), QtCore.QPointF(t, ma))
             prema = ma
-            
-
+            radio=1
+            yoffset=5
+            if trade_date == stocklist[selectIndex].DateToBuy or trade_date == stocklist[selectIndex].DateToSale:
+                if stocklist[selectIndex].Decision == 'buy':
+                    p.setPen(pg.mkPen('r'))
+                    p.setBrush(pg.mkBrush('r'))
+                    p.drawEllipse(int(t-radio), int(low-radio)-yoffset, int(2*radio), int(2*radio))
+                elif stocklist[selectIndex].Decision == "sale":
+                    p.setPen(pg.mkPen('g'))
+                    p.setBrush(pg.mkBrush('g'))
+                    p.drawEllipse(int(t-radio), int(low-radio)-yoffset, int(2*radio), int(2*radio))
+                if len(stocklist)-1!=selectIndex:
+                    selectIndex += 1
         p.end()
+    def appendDataToPicture(self,buySalePointList):
+        pass
+
+
     def paint(self, p, *args):
         p.drawPicture(0, 0, self.picture)
     def boundingRect(self):
@@ -111,10 +130,11 @@ class CandlestickItem(pg.GraphicsObject):
 
     def mousePressEvent(self, event):
         pos = event.scenePos()
-        if event.button() == QtCore.Qt.RightButton:
-            self.onRClick(event.pos())
-        elif event.button() == QtCore.Qt.LeftButton:
-            self.onLClick(event.pos())
+        self.mouseMoveEvent(event)
+        # if event.button() == QtCore.Qt.RightButton:
+        #     self.onRClick(event.pos())
+        # elif event.button() == QtCore.Qt.LeftButton:
+        #     self.onLClick(event.pos())
 
     # def mouseReleaseEvent(self, event):
     #     print()
@@ -133,17 +153,14 @@ class CandlestickItem(pg.GraphicsObject):
         # print(y)
         lastPos = event.lastPos()
         dif = pos - lastPos
-        # label = pg.LabelItem(justify='left')
-        # self.plt.addItem(label)
-        # label.setText(
-        #     "<span style='font-size: 12pt'>x=%0.1f,   <span style='color: red'>y1=%0.1f</span>" % (
-        #         mousePoint.x(), self.data[index]))
         if index > 0 and index < self.days:
-            # dt = f"{dt[0:4]}-{dt[4:6]}-{dt[6:]}"
-            # ui.label.setText(f"日期={self.data[index][1]}  开盘={self.data[index][2]}  收盘={self.data[index][3]}")
             a = f"日期={self.data[index][1]}  开盘={self.data[index][2]}  收盘={self.data[index][3]}"
             self.label.setText(a)
 
         self.label.setPos(pos.x(), pos.y())
         self.vLine.setPos(pos.x())
         self.hLine.setPos(y)
+        sigMouseMoveChanged.emit(event)
+
+
+
