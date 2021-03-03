@@ -11,9 +11,9 @@ from Fetch_stock_data import Fetch_stock_data
  """
 
 
-class earning_Compare(Fetch_stock_data):
+class Earning_compare(Fetch_stock_data):
     def __init__(self):
-        super(earning_Compare, self).__init__()
+        super(Earning_compare, self).__init__()  # 从Fetch_stock_data继承初始化
         self.length = 0
         self.Top_List, self.detal_list, self.summary_list = [], [], []
 
@@ -21,35 +21,32 @@ class earning_Compare(Fetch_stock_data):
         self.ss = []
         # self.iterate()
 
-    def CalculateForAllStock(self):
+    def Calculate_AllStock(self):  # 计算所有股票的收益
         i = 0
         self.length = len(config.Stock_list.keys())
-        for code in config.Stock_list.values():
-            self.ini(code)
-            self.datum = self.Data_form_list.Moving_datum
-            self.ss = Calculation(self.datum)
-            self.Compare()
+        for code in config.Stock_list.values():  # 获取Stock_list内的value值-股票代码
+            self.ini(code)  # 连接数据库 获取表头和表内数据
+            self.datum = self.Data_form_list.Moving_datum  # 移动平均线的数据
+            self.ss = Calculation(self.datum)  # 计算并返回收益值
+            self.Compare()  # 比较股票收益
             i += 1
-            # print(self.Top_List)
             print(f"还剩{self.length - i}")
-        self.Write_to_txt()
+        self.Write_to_txt() # 写入txt文件
         return self.Top_List
 
-    def CalculateForspecStock(self, Stocklist):
+    def Calculate_SpecStock(self, Stocklist):
         i = 0
         self.length = len(Stocklist)
         for code in Stocklist.values():
-            self.ini(code)
-            self.datum = self.Data_form_list.Moving_datum
+            self.ini(code)# 连接数据库 获取表头和表内数据
+            self.datum = self.Data_form_list.Moving_datum# 移动平均线的数据
             self.ss = Calculation(self.datum)
             self.Compare()
             i += 1
-            # print(self.Top_List)
             print(f"还剩{self.length - i}")
-        # self.Write_to_txt()
-        return self.Top_List
+        return self.Top_List  # 前10的股票列表
 
-    def bubble_sort(self):
+    def bubble_sort(self): # 冒泡排序
 
         length = len(self.Top_List)
         for i in range(length - 1):
@@ -61,7 +58,7 @@ class earning_Compare(Fetch_stock_data):
                     self.Top_List[j], self.Top_List[j + 1] = self.Top_List[j + 1], self.Top_List[j]
 
     def Compare(self):
-        To_be_compare = [int(self.ss.final_amount), self.ss.trade_datum]
+        To_be_compare = [int(self.ss.final_amount), self.ss.trade_datum] #
         if len(self.Top_List) < 10:
             self.Top_List.append(To_be_compare)
             if len(self.Top_List) == 10:
@@ -95,4 +92,4 @@ class earning_Compare(Fetch_stock_data):
 
 
 if __name__ == '__main__':
-    earning_Compare()
+    Earning_compare()
