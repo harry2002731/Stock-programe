@@ -67,7 +67,12 @@ class Main(QtWidgets.QMainWindow):
         float(high), float(vol), float(change), float(pct_chg)) """
 
     def MymouseEvent(self, event):
-        self.cdst1.vLine.setPos(event.x)
+        pos=event.pos()
+        self.d.vLine.setPos(int(pos.x()))
+        self.cdst.vLine.setPos(int(pos.x()))
+
+
+
 
     def pushButton_4_gainloseCal(self):
         # 自选股收益计算
@@ -102,7 +107,6 @@ class Main(QtWidgets.QMainWindow):
             for c in range(len(detail)):
                 amount = amount + detail[c][11]
                 wg.addItem(f"{detail[c][0] - 1}： 累计收益:{amount} : {detail[c][3:]}")
-
     def recommendStockCal(self):
         ec = earning_Compare()
         # list = {'宏大爆破': '002683.SZ',
@@ -126,13 +130,11 @@ class Main(QtWidgets.QMainWindow):
             for c in range(len(detail)):
                 amount = amount + detail[c][11]
                 ui.listWidget_3.addItem(f"{detail[c][0] - 1}： 累计收益:{amount} : {detail[c][3:]}")
-
     def appendToInteringStockList(self):
         text = ui.listWidget.currentItem().text()
         ui.listWidget_2.addItem(text)
 
         # 保存自选股名单
-
     def moveFromInteringStockList(self):
         text = ui.listWidget_2.currentItem().text()
 
@@ -140,7 +142,6 @@ class Main(QtWidgets.QMainWindow):
             item = ui.listWidget_2.item(i).text()
             if text == item:
                 ui.listWidget_2.takeItem(i)
-
     def custom_edit_textChanged(self, event):
         # if event != '':
         try:
@@ -154,30 +155,29 @@ class Main(QtWidgets.QMainWindow):
                 self.setText(event)
         except Exception:
             pass
-
     def listWidget2_selectionChange(self):
         text = ui.listWidget_2.currentItem().text()
         self.stockclick(text)
-
     def stockclick(self, text):
         Datalist = Fetch_stock_data()
         Datalist.ini(config.Stock_list[text])
 
         Moving_data = Datalist.Data_form_list.Moving_datum
-        cdst = CandlestickItem(Datalist.Data_form_list.Candle_datum, Moving_data, 400)
-        cdst1 = AmountstickItem(Datalist.Data_form_list.Amount_datum, 400)
+        self.cdst = CandlestickItem(Datalist.Data_form_list.Candle_datum, Moving_data, 400)
+    
+        self.cdst1 = AmountstickItem(Datalist.Data_form_list.Amount_datum, 400)
+        
         list = Calculation(Moving_data)
 
-        d = Mat_picture(list.earning_x, list.earning_y, Datalist.Data_form_list.Candle_datum)
-        # cdst1.appendDataToPicture(text)
-
-        cdst.sigMouseMoveChanged.connect(self.MymouseEvent)  # K线图鼠标同步事件
+        self.d = Mat_picture(list.earning_x, list.earning_y, Datalist.Data_form_list.Candle_datum)
+        self.cdst.sigMouseMoveChanged.connect(self.MymouseEvent)  # K线图鼠标同步事件
+        self.d.sigMouseMoveChanged.connect(self.MymouseEvent)  # K线图鼠标同步事件
 
         if ui.verticalLayout.count() == 0:
-            ui.verticalLayout.addWidget(cdst.plt)
-            ui.verticalLayout.addWidget(cdst1.plt)
-            ui.verticalLayout_2.addWidget(cdst.plt)
-            ui.verticalLayout_2.addWidget(d.plt)
+            ui.verticalLayout.addWidget(self.cdst.plt)
+            ui.verticalLayout.addWidget(self.cdst1.plt)
+            ui.verticalLayout_2.addWidget(self.cdst.plt)
+            ui.verticalLayout_2.addWidget(self.d.plt)
         else:
             for i in range(ui.verticalLayout.count()):
                 ui.verticalLayout.itemAt(i).widget().deleteLater()
@@ -185,13 +185,13 @@ class Main(QtWidgets.QMainWindow):
                 ui.verticalLayout_2.itemAt(i).widget().deleteLater()
             Moving_data = Datalist.Data_form_list.Moving_datum
             # cdst = CandlestickItem(Datalist.Data_form_list.Candle_datum, Moving_data, 400)
-            # cdst1 = AmountstickItem(Datalist.Data_form_list.Amount_datum, 400)
-            ui.verticalLayout.addWidget(cdst.plt)
-            ui.verticalLayout.addWidget(cdst1.plt)
+            #         self.cdst1 = AmountstickItem(Datalist.Data_form_list.Amount_datum, 400)
+            ui.verticalLayout.addWidget(self.cdst.plt)
+            ui.verticalLayout.addWidget(self.cdst1.plt)
             # list = Calculation(Moving_data)
             # d = Mat_picture(list.earning_x, list.earning_y,Datalist.Data_form_list.Candle_datum)
-            ui.verticalLayout_2.addWidget(cdst.plt)
-            ui.verticalLayout_2.addWidget(d.plt)
+            ui.verticalLayout_2.addWidget(self.cdst.plt)
+            ui.verticalLayout_2.addWidget(self.d.plt)
 
         self.singleStockGainLoseCal(text)
 
@@ -225,7 +225,6 @@ class Main(QtWidgets.QMainWindow):
             for c in range(len(detail)):
                 amount = amount + detail[c][11]
                 wg.addItem(f"{detail[c][0] - 1}： 累计收益:{amount} : {detail[c][3:]}")
-
     def listWidget_selectionChange(self):
         text = ui.listWidget.currentItem().text()
         self.stockclick(text)

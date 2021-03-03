@@ -6,18 +6,17 @@ from PyQt5.QtCore import pyqtSignal, QObject
 
 from utility import Descison, selectedStock
 
-sigMouseMoveChanged = pyqtSignal(QObject)
 
 class CandlestickItem(pg.GraphicsObject):
-    sigMouseMoveChanged = pyqtSignal()  # 鼠标移动事件
+    sigMouseMoveChanged = pyqtSignal(QGraphicsSceneMouseEvent)  # 鼠标移动事件
 
     def __init__(self, data, datum, days):
         pg.GraphicsObject.__init__(self)
         self.picture = QtGui.QPicture()
         self.data = data
-        self.days=config.StockDataDays
-        if len(self.data)>self.days:
-            self.days=len(self.data)
+        self.days = config.StockDataDays
+        if len(self.data) > self.days:
+            self.days = len(self.data)
         # self.days = days
         self.plt = pg.PlotWidget()
         self.vLine = pg.InfiniteLine(angle=90, movable=False)
@@ -42,7 +41,7 @@ class CandlestickItem(pg.GraphicsObject):
         xdict = []
         # self.days=config.StockDataDays
         # if len(self.data)>self.days:
-        self.days=len(self.data)
+        self.days = len(self.data)
         for i in range(self.days):
             dt = self.data[i][1]
             dt = f"{dt[0:4]}-{dt[4:6]}-{dt[6:]}"
@@ -62,11 +61,12 @@ class CandlestickItem(pg.GraphicsObject):
 
         # plt.showGrid(x=True, y=True)
         return self.plt
+
     def generatePicture(self, stocklist):
         p = QtGui.QPainter(self.picture)
         p.setPen(pg.mkPen('w'))
-        if len(self.data)<self.days:
-            self.days=len(self.data)
+        if len(self.data) < self.days:
+            self.days = len(self.data)
 
         w = (self.data[1][0] - self.data[0][0]) / 3.
         prema5 = 0
@@ -99,26 +99,27 @@ class CandlestickItem(pg.GraphicsObject):
                 p.setBrush(pg.mkBrush('b'))
                 p.drawLine(QtCore.QPointF(t - 1, prema), QtCore.QPointF(t, ma))
             prema = ma
-            radio=1
-            yoffset=5
+            radio = 1
+            yoffset = 5
             if trade_date == stocklist[selectIndex].DateToBuy or trade_date == stocklist[selectIndex].DateToSale:
                 if stocklist[selectIndex].Decision == 'buy':
                     p.setPen(pg.mkPen('r'))
                     p.setBrush(pg.mkBrush('r'))
-                    p.drawEllipse(int(t-radio), int(low-radio)-yoffset, int(2*radio), int(2*radio))
+                    p.drawEllipse(int(t - radio), int(low - radio) - yoffset, int(2 * radio), int(2 * radio))
                 elif stocklist[selectIndex].Decision == "sale":
                     p.setPen(pg.mkPen('g'))
                     p.setBrush(pg.mkBrush('g'))
-                    p.drawEllipse(int(t-radio), int(low-radio)-yoffset, int(2*radio), int(2*radio))
-                if len(stocklist)-1!=selectIndex:
+                    p.drawEllipse(int(t - radio), int(low - radio) - yoffset, int(2 * radio), int(2 * radio))
+                if len(stocklist) - 1 != selectIndex:
                     selectIndex += 1
         p.end()
-    def appendDataToPicture(self,buySalePointList):
-        pass
 
+    def appendDataToPicture(self, buySalePointList):
+        pass
 
     def paint(self, p, *args):
         p.drawPicture(0, 0, self.picture)
+
     def boundingRect(self):
         return QtCore.QRectF(self.picture.boundingRect())
 
@@ -156,11 +157,7 @@ class CandlestickItem(pg.GraphicsObject):
         if index > 0 and index < self.days:
             a = f"日期={self.data[index][1]}  开盘={self.data[index][2]}  收盘={self.data[index][3]}"
             self.label.setText(a)
-
-        self.label.setPos(pos.x(), pos.y())
-        self.vLine.setPos(pos.x())
-        self.hLine.setPos(y)
-        sigMouseMoveChanged.emit(event)
-
-
-
+            self.label.setPos(pos.x(), pos.y())
+            self.vLine.setPos(pos.x())
+            self.hLine.setPos(y)
+            self.sigMouseMoveChanged.emit(event)

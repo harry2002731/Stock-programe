@@ -1,15 +1,17 @@
 import datetime
-
 import pandas as pd
+
 
 from utility import *
 import matplotlib.pyplot as plt
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import *
 import numpy as np
 import pyqtgraph as pg
 import config
 from SQLserver import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt5.QtCore import pyqtSignal, QObject
 
 Interchange_fees = 0.003
 QtySale = 1
@@ -129,6 +131,9 @@ class Calculation():
 
 
 class Mat_picture(pg.GraphicsObject):
+
+    sigMouseMoveChanged = pyqtSignal(QGraphicsSceneMouseEvent)  # 鼠标移动事件
+
     def __init__(self, x, y,data):
         pg.GraphicsObject.__init__(self)
         self.picture = QtGui.QPicture()
@@ -214,10 +219,10 @@ class Mat_picture(pg.GraphicsObject):
 
     def mousePressEvent(self, event):
         pos = event.scenePos()
-        if event.button() == QtCore.Qt.RightButton:
-            self.onRClick(event.pos())
-        elif event.button() == QtCore.Qt.LeftButton:
-            self.onLClick(event.pos())
+        # if event.button() == QtCore.Qt.RightButton:
+        #     self.onRClick(event.pos())
+        # elif event.button() == QtCore.Qt.LeftButton:
+        #     self.onLClick(event.pos())
 
     def mouseMoveEvent(self, event):
         pos = event.pos()
@@ -238,7 +243,7 @@ class Mat_picture(pg.GraphicsObject):
             self.vLine.setPos(pos.x())
             # self.hLine.setPos(pos.y())
 
-
+        self.sigMouseMoveChanged.emit(event)
 
 # if __name__ == '__main__':
 #     list = Calculation(datum)
