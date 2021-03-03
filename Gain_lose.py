@@ -137,25 +137,27 @@ class Mat_picture(pg.GraphicsObject):
     def __init__(self, x, y,data):
         pg.GraphicsObject.__init__(self)
         self.picture = QtGui.QPicture()
-        self.data=data
+        self.stocklist=data
+        datum=data
         # self.days=config.StockDataDays
         # if len(self.data)>self.days:
-        self.days=len(self.data)
+        self.days=len(self.stocklist)
 
         self.y = np.array(y)        
         self.plt = pg.PlotWidget()        
         self.vLine = pg.InfiniteLine(angle=90, movable=False)
         self.hLine = pg.InfiniteLine(angle=0, movable=False)
-        
-        self.x = x      
-        self.generate_picture()
+        des = Descison()       
+        des.selectStock_avg(datum)
+        self.x = x  
+        self.generatePicture(des.selectedStockList)
 
         xdict = []
         for i in range(self.days):
-            dt = self.data[i][1]
+            dt = self.stocklist[i][1]
             dt = f"{dt[0:4]}-{dt[4:6]}-{dt[6:]}"
             if i % (int(self.days / 20)) == 0 or i == range(self.days):
-                xdict.append((self.data[i][0], dt))
+                xdict.append((self.stocklist[i][0], dt))
         stringaxis = pg.AxisItem(orientation='bottom')
         stringaxis.setTicks([xdict])
         self.plt = pg.PlotWidget(axisItems={'bottom': stringaxis}, enableMenu=True)
@@ -173,24 +175,37 @@ class Mat_picture(pg.GraphicsObject):
         self.plt.addItem(self.label)
 
 
-    def generate_picture(self):        
+    def generatePicture(self,stocklist):
         p = QtGui.QPainter(self.picture)
         p.setPen(pg.mkPen('g'))        
         prePoint = 0
         selectIndex = 0
         
-        t = [i[0] for i in self.data] 
-        trade_date=[i[1] for i in self.data] 
+        t = [i[0] for i in self.stocklist] 
+        trade_date=[i[1] for i in self.stocklist] 
         list = dict(zip(trade_date, t))
 
         for i in range(len(self.x)):
             t=list[self.x[i]]
             
             if t == config.StockDataDays:
-                break            
+                break
+            radio = 1
+            yoffset = 5
             if prePoint != 0:
-                p.setPen(pg.mkPen('w'))
-                p.setBrush(pg.mkBrush('w'))
+
+                # if stocklist[selectIndex].Decision == 'buy':
+                #         p.setPen(pg.mkPen('r'))
+                #         p.setBrush(pg.mkBrush('r'))
+                #         p.drawLine(QtCore.QPointF(pre_t, prePoint), QtCore.QPointF(t, self.y[selectIndex]/10000))
+                # if stocklist[selectIndex].Decision == "sale":
+                #         p.setPen(pg.mkPen('g'))
+                #         p.setBrush(pg.mkBrush('g'))
+                #         p.drawLine(QtCore.QPointF(pre_t, prePoint), QtCore.QPointF(t, self.y[selectIndex]/10000))
+
+                p.setPen(pg.mkPen('g'))
+                p.setBrush(pg.mkBrush('g'))
+
                 p.drawLine(QtCore.QPointF(pre_t, prePoint), QtCore.QPointF(t, self.y[selectIndex]/10000))
 
                 p.setPen(pg.mkPen('r'))
@@ -200,6 +215,26 @@ class Mat_picture(pg.GraphicsObject):
             pre_t=t
             prePoint = self.y[selectIndex]/10000
             selectIndex =selectIndex+1
+
+        selectIndex = 0
+        radio = 1
+        yoffset = 5
+        for td in trade_date :
+            if prePoint != 0:
+                if td == stocklist[selectIndex].DateToBuy or td == stocklist[selectIndex].DateToSale:
+                    if stocklist[selectIndex].Decision == 'buy':
+                        p.setPen(pg.mkPen('r'))
+                        p.setBrush(pg.mkBrush('r'))
+                        p.drawLine(QtCore.QPointF(pre_t, prePoint), QtCore.QPointF(t, self.y[selectIndex]/10000))
+                    elif stocklist[selectIndex].Decision == "sale":
+                        p.setPen(pg.mkPen('g'))
+                        p.setBrush(pg.mkBrush('g'))
+                        p.drawLine(QtCore.QPointF(pre_t, prePoint), QtCore.QPointF(t, self.y[selectIndex]/10000))
+                    
+            pre_t=t     
+            prePoint = self.y[selectIndex]/10000
+            if len(stocklist) - 1 != selectIndex:
+                selectIndex += 1
         p.end()
 
     def paint(self, p, *args):
@@ -227,7 +262,7 @@ class Mat_picture(pg.GraphicsObject):
     def mouseMoveEvent(self, event):
         pos = event.pos()
         index = int(pos.x())
-        xdate = self.data[index][1]
+        xdate = self.stocklist[index][1]
         y= 0
         if xdate in self.x and 0 < index < self.days:
             list = dict(zip(self.x, self.y))

@@ -22,7 +22,7 @@ class CandlestickItem(pg.GraphicsObject):
         self.vLine = pg.InfiniteLine(angle=90, movable=False)
         self.hLine = pg.InfiniteLine(angle=0, movable=False)
         des = Descison()
-        s = selectedStock()
+        
         des.selectStock_avg(datum)
         # for s in des.selectedStockList:
         #     print(s.DateToBuy, s.DateToSale, s.Decision)

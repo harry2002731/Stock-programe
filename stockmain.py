@@ -37,9 +37,7 @@ class Main(QtWidgets.QMainWindow):
 
         ui.pushButton.clicked.connect(self.appendToInteringStockList)  # 添加到自选股
         ui.pushButton_2.clicked.connect(self.moveFromInteringStockList)  # 移除自选股
-
         ui.pushButton_3.clicked.connect(self.recommendStockCal)  # 荐股计算
-
         ui.pushButton_4.clicked.connect(self.pushButton_4_gainloseCal)  # 自选股收益计算
 
 
@@ -163,6 +161,7 @@ class Main(QtWidgets.QMainWindow):
         Datalist.ini(config.Stock_list[text])
 
         Moving_data = Datalist.Data_form_list.Moving_datum
+        
         self.cdst = CandlestickItem(Datalist.Data_form_list.Candle_datum, Moving_data, 400)
     
         self.cdst1 = AmountstickItem(Datalist.Data_form_list.Amount_datum, 400)
