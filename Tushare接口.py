@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-import sqlite3
-import os
-import pandas
 import tushare as t1
 from config import *
 from log import log as logger
@@ -70,54 +67,47 @@ class Sql_Data_Handle():
                 self.line_num + 1)], [0 for i in range(self.line_num + 1)], [0 for i in range(self.line_num + 1)], [0
                                                                                                                     for
                                                                                                                     i in
-                                                                                                                    range(
-                                                                                                                        self.line_num + 1)]
+                                                                                                                    range(self.line_num + 1)]
+        # f_day 五日平均线，ten_day 十日平均线，t_day 二十日平均线，s_day 六十日平均线
         i, f_day, ten_day, t_day, s_day = 0, 0, 0, 0, 0
         # 循环调用character()函数-读取每行数据
         while self.line_num >= 0:
             value_list = self.character()
             vol = value_list[9]  # 交易量
             amount = value_list[10]  # 交易额
-            avg_list[i] = float(format(amount * 10 / vol, '.3f'))
+            avg_list[i] = float(format(amount * 10 / vol, '.3f'))  # 保留三位小数
+            # 计算移动平均线
             if i < 5:
-                # avg_list_5day[i] = ''
                 f_day += avg_list[i]
             else:
                 f_day = f_day + avg_list[i] - avg_list[i - 5]
-                avg_list_5day[i] = float(format((f_day) / 5, '.3f'))
+                avg_list_5day[i] = float(format(f_day / 5, '.3f'))
             if i < 10:
-                # avg_list_10day[i] = ''
                 ten_day += avg_list[i]
             else:
                 ten_day = ten_day + avg_list[i] - avg_list[i - 10]
                 avg_list_10day[i] = float(format(ten_day / 10, '.2f'))
             if i < 20:
-                # avg_list_20day[i] = ''
                 t_day += avg_list[i]
             else:
                 t_day = t_day + avg_list[i] - avg_list[i - 20]
                 avg_list_20day[i] = float(format(t_day / 20, '.3f'))
             if i < 60:
-                # avg_list_60day[i] = ''
                 s_day += avg_list[i]
             else:
                 s_day = s_day + avg_list[i] - avg_list[i - 60]
                 avg_list_60day[i] = float(format(s_day / 60, '.3f'))
             try:
-                insert_sql = f"""insert into stock ({tushare["Column"]}) values """ + f"(\'{value_list[0]}\',\'{value_list[1]}\',\'{value_list[2]}\',\'{value_list[3]}\',\'{value_list[4]}\',\'{value_list[5]}\',\'{value_list[6]}\',\'{value_list[7]}\',\'{value_list[8]}\',\'{value_list[9]}\',\'{value_list[10]}\',\'{avg_list[i]}\',\'{avg_list_5day[i]}\',\'{avg_list_10day[i]}\',\'{avg_list_20day[i]}\',\'{avg_list_60day[i]}\')"
-                Sql.Sql_execution(insert_sql)
+                # 插入数据库
+                Sql.Sql_execution(
+                    f"""insert into stock ({tushare["Column"]}) values """ + f"(\'{value_list[0]}\',\'{value_list[1]}\',\'{value_list[2]}\',\'{value_list[3]}\',\'{value_list[4]}\',\'{value_list[5]}\',\'{value_list[6]}\',\'{value_list[7]}\',\'{value_list[8]}\',\'{value_list[9]}\',\'{value_list[10]}\',\'{avg_list[i]}\',\'{avg_list_5day[i]}\',\'{avg_list_10day[i]}\',\'{avg_list_20day[i]}\',\'{avg_list_60day[i]}\')")
             except Exception:
+                # 出错信息
                 logger.logerror(f"{value_list[0]}-{value_list[1]}未被添加！")
             self.line_num -= 1
             i += 1
         print(f"The data has been added to the stock database")
         return i
-
-    def delete_data(self, data):
-        delete_sql = "delete from " + key + " where trade_date=" + data
-        sql = delete_sql
-        Sql.Sql_execution(sql)
-        print("The data has been deleted")
 
 
 if __name__ == '__main__':
@@ -141,11 +131,12 @@ for key in stock_code:
         sd, ed = "20181231", "20201231"  # 起始日期，结束日期
         logger.loginfo(f"抓取{key}股票数据")
         start = time.perf_counter()  # 开始时间
-        df = Append_Data(input_code, sd, ed).web_spider()
+        df = Append_Data(input_code, sd, ed).web_spider()  # dataframe格式股票数据
         line_num = Sql_Data_Handle(df, Sql.connection, Sql.curs).add_data()
         end = time.perf_counter()  # 结束时间
+        # 记录用时
         logger.loginfo(f"添加{key}股票数据到数据库--成功,用时{start - end}")
-        # 第一个参数为模式选择 1为增加数据， 2为删除数据 。“xxxx”为删除日期
+        # 记录添加的数据条数
         logger.loginfo(f"{key} 共{line_num}条数据已添加到数据库！")
     except Exception as e:
         logger.logerror(e)
