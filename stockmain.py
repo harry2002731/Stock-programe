@@ -11,7 +11,7 @@ import config
 import fuzzyfinder
 from utility import *
 from Gain_lose import *
-from Earning_compare import Earning_compare
+from earning_Compare import Earning_compare
 from Fetch_stock_data import Fetch_stock_data
 from CandlestickItem import CandlestickItem
 from AmountstickItem import AmountstickItem

@@ -1,7 +1,6 @@
 import datetime
 import pandas as pd
 
-
 from utility import *
 import matplotlib.pyplot as plt
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -32,7 +31,7 @@ datum = Data.Moving_datum
 class Calculation():
     def __init__(self, datum):
         # self.amount
-        self.datum=datum
+        self.datum = datum
         self.hold_vol = 0
         self.final_amount = 0
         self.hold_amount = 100000
@@ -58,7 +57,7 @@ class Calculation():
             self.Stocklist = self.stocklist[selectIndex]
             self.Decision()
             if selectIndex == len(self.stocklist) - 1:
-                print(int(self.Final_amount())) # 打印最终总收益  类型--int
+                print(int(self.Final_amount()))  # 打印最终总收益  类型--int
             selectIndex += 1
 
     def Decision(self):
@@ -77,25 +76,25 @@ class Calculation():
         if self.Stocklist.Decision == "sale":
             self.Selling()
             if self.Stocklist.ID != 1:
-                gainlose = self.Stocklist.AmountSale - self.Buy_rec[3] # AmountBuy
+                gainlose = self.Stocklist.AmountSale - self.Buy_rec[3]  # AmountBuy
                 if self.Stocklist.AmountBuy == 0:
                     self.Stocklist.AmountBuy = 1
 
-                self.Sale_rec = [self.Stocklist.DateToSale, self.Stocklist.PriceSale,self.Stocklist.QtySale,
-                                     self.Stocklist.AmountSale, gainlose, round(gainlose*100 / self.Buy_rec[3],2)]
-                    # rec = [self.Stocklist.ID, self.Stocklist.Name, self.Stocklist.DateToBuy, self.Stocklist.PriceBuy, self.Stocklist.QtyBuy,
-                    #        self.Stocklist.AmountBuy, self.Stocklist.DateToSale, self.Stocklist.QtySale,
-                    #        self.Stocklist.PriceSale, self.Stocklist.AmountSale, gainlose, gainlose / self.Stocklist.AmountBuy]
+                self.Sale_rec = [self.Stocklist.DateToSale, self.Stocklist.PriceSale, self.Stocklist.QtySale,
+                                 self.Stocklist.AmountSale, gainlose, round(gainlose * 100 / self.Buy_rec[3], 2)]
+                # rec = [self.Stocklist.ID, self.Stocklist.Name, self.Stocklist.DateToBuy, self.Stocklist.PriceBuy, self.Stocklist.QtyBuy,
+                #        self.Stocklist.AmountBuy, self.Stocklist.DateToSale, self.Stocklist.QtySale,
+                #        self.Stocklist.PriceSale, self.Stocklist.AmountSale, gainlose, gainlose / self.Stocklist.AmountBuy]
                 rec = stock_inf + self.Buy_rec + self.Sale_rec
                 self.trade_datum.append(rec)
 
     def Buying(self):
         trade_date = self.Stocklist.DateToBuy
         self.avg_price = self.Stocklist.PriceBuy
-        vol=self.Stocklist.QtyBuy
+        vol = self.Stocklist.QtyBuy
         # vol = int(self.hold_amount / (self.avg_price * 1.003))
         # cost = -(self.avg_price * 1.003) * vol
-        cost=-self.Stocklist.AmountBuy
+        cost = -self.Stocklist.AmountBuy
         self.Hold_amount(trade_date, cost)
         self.Hold_vol(trade_date, vol)
         self.Earning(trade_date)
@@ -103,10 +102,10 @@ class Calculation():
     def Selling(self):
         trade_date = self.Stocklist.DateToSale
         self.avg_price = self.Stocklist.PriceSale
-        vol=-self.Stocklist.QtySale
+        vol = -self.Stocklist.QtySale
         # vol = -int(self.hold_vol * QtySale)
         # cost = (self.avg_price * 0.997) * -vol
-        cost=self.Stocklist.AmountSale
+        cost = self.Stocklist.AmountSale
         self.Hold_amount(trade_date, cost)
         self.Hold_vol(trade_date, vol)
         self.Earning(trade_date)
@@ -131,25 +130,24 @@ class Calculation():
 
 
 class Mat_picture(pg.GraphicsObject):
-
     sigMouseMoveChanged = pyqtSignal(QGraphicsSceneMouseEvent)  # 鼠标移动事件
 
-    def __init__(self, x, y,data):
+    def __init__(self, x, y, data):
         pg.GraphicsObject.__init__(self)
         self.picture = QtGui.QPicture()
-        self.stocklist=data
-        datum=data
+        self.stocklist = data
+        datum = data
         # self.days=config.StockDataDays
         # if len(self.data)>self.days:
-        self.days=len(self.stocklist)
+        self.days = len(self.stocklist)
 
-        self.y = np.array(y)        
-        self.plt = pg.PlotWidget()        
+        self.y = np.array(y)
+        self.plt = pg.PlotWidget()
         self.vLine = pg.InfiniteLine(angle=90, movable=False)
         self.hLine = pg.InfiniteLine(angle=0, movable=False)
-        des = Descison()       
+        des = Descison()
         des.selectStock_avg(datum)
-        self.x = x  
+        self.x = x
         self.generatePicture(des.selectedStockList)
 
         xdict = []
@@ -163,37 +161,35 @@ class Mat_picture(pg.GraphicsObject):
         self.plt = pg.PlotWidget(axisItems={'bottom': stringaxis}, enableMenu=True)
 
         item = self
-        self.plt.addItem(item)  
+        self.plt.addItem(item)
 
         self.plt.addItem(self.vLine, ignoreBounds=True)
-        self.plt.addItem(self.hLine, ignoreBounds=True)  
-           
+        self.plt.addItem(self.hLine, ignoreBounds=True)
+
         self.plt.setLabel('left', '收益(万)')
         self.plt.setLabel('bottom', '日 期')
         self.setFlag(self.ItemUsesExtendedStyleOption)
         self.label = pg.TextItem(text='', color=(255, 255, 255))
         self.plt.addItem(self.label)
 
-
-    def generatePicture(self,stocklist):
+    def generatePicture(self, stocklist):
         p = QtGui.QPainter(self.picture)
-        p.setPen(pg.mkPen('g'))        
+        p.setPen(pg.mkPen('g'))
         prePoint = 0
         selectIndex = 0
-        
-        t = [i[0] for i in self.stocklist] 
-        trade_date=[i[1] for i in self.stocklist] 
+
+        t = [i[0] for i in self.stocklist]
+        trade_date = [i[1] for i in self.stocklist]
         list = dict(zip(trade_date, t))
 
         for i in range(len(self.x)):
-            t=list[self.x[i]]
-            
+            t = list[self.x[i]]
+
             if t == config.StockDataDays:
                 break
             radio = 1
             yoffset = 5
             if prePoint != 0:
-
                 # if stocklist[selectIndex].Decision == 'buy':
                 #         p.setPen(pg.mkPen('r'))
                 #         p.setBrush(pg.mkBrush('r'))
@@ -206,47 +202,50 @@ class Mat_picture(pg.GraphicsObject):
                 p.setPen(pg.mkPen('g'))
                 p.setBrush(pg.mkBrush('g'))
 
-                p.drawLine(QtCore.QPointF(pre_t, prePoint), QtCore.QPointF(t, self.y[selectIndex]/10000))
+                p.drawLine(QtCore.QPointF(pre_t, prePoint), QtCore.QPointF(t, self.y[selectIndex] / 10000))
 
                 p.setPen(pg.mkPen('r'))
                 p.setBrush(pg.mkBrush('r'))
-                p.drawEllipse(pre_t-1, prePoint-1, 1 * 2, 1 * 2)
+                p.drawEllipse(pre_t - 1, prePoint - 1, 1 * 2, 1 * 2)
 
-            pre_t=t
-            prePoint = self.y[selectIndex]/10000
-            selectIndex =selectIndex+1
+            pre_t = t
+            prePoint = self.y[selectIndex] / 10000
+            selectIndex = selectIndex + 1
 
         selectIndex = 0
         radio = 1
         yoffset = 5
-        for td in trade_date :
+        for td in trade_date:
             if prePoint != 0:
                 if td == stocklist[selectIndex].DateToBuy or td == stocklist[selectIndex].DateToSale:
                     if stocklist[selectIndex].Decision == 'buy':
                         p.setPen(pg.mkPen('r'))
                         p.setBrush(pg.mkBrush('r'))
-                        p.drawLine(QtCore.QPointF(pre_t, prePoint), QtCore.QPointF(t, self.y[selectIndex]/10000))
+                        p.drawLine(QtCore.QPointF(pre_t, prePoint), QtCore.QPointF(t, self.y[selectIndex] / 10000))
                     elif stocklist[selectIndex].Decision == "sale":
                         p.setPen(pg.mkPen('g'))
                         p.setBrush(pg.mkBrush('g'))
-                        p.drawLine(QtCore.QPointF(pre_t, prePoint), QtCore.QPointF(t, self.y[selectIndex]/10000))
-                    
-            pre_t=t     
-            prePoint = self.y[selectIndex]/10000
+                        p.drawLine(QtCore.QPointF(pre_t, prePoint), QtCore.QPointF(t, self.y[selectIndex] / 10000))
+
+            pre_t = t
+            prePoint = self.y[selectIndex] / 10000
             if len(stocklist) - 1 != selectIndex:
                 selectIndex += 1
         p.end()
 
     def paint(self, p, *args):
         p.drawPicture(0, 0, self.picture)
+
     def boundingRect(self):
         return QtCore.QRectF(self.picture.boundingRect())
+
     def onLClick(self, pos):
         x = pos.x()
         y = pos.y()
         self.vLine.setPos(pos.x())
         self.hLine.setPos(pos.y())
-# 手动重画
+
+    # 手动重画
     # ----------------------------------------------------------------------
     def update(self):
         if not self.scene() is None:
@@ -263,10 +262,10 @@ class Mat_picture(pg.GraphicsObject):
         pos = event.pos()
         index = int(pos.x())
         xdate = self.stocklist[index][1]
-        y= 0
+        y = 0
         if xdate in self.x and 0 < index < self.days:
             list = dict(zip(self.x, self.y))
-            y = list[xdate]/10000
+            y = list[xdate] / 10000
             self.vLine.setPos(pos.x())
             self.hLine.setPos(y)
 
