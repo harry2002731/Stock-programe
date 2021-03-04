@@ -19,6 +19,11 @@ class DataServer_Sqlite3():
         self.curs = self.curs.execute(sql)
         self.connection.commit()
 
+    def delete_data(self, key, data):
+        self.curs = self.curs.execute(f"delete from " + key + " where trade_date=" + data)
+        self.connection.commit()
+        print("The data has been deleted")
+
     def Fetch_data(self):
         self.header = self.curs.description
         self.data = self.curs.fetchall()
